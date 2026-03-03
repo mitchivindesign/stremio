@@ -9,6 +9,7 @@ const path = require('path');
 const https = require('https');
 
 const ROOT = path.join(__dirname, '..');
+const LOCAL_CONFIG = path.join(ROOT, 'ui-config.json');
 const LOCAL_AUTH = path.join(ROOT, 'stremio-auth.json');
 const HTML_FILE = path.join(ROOT, 'src', 'admin.html');
 
