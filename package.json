@@ -1,0 +1,18 @@
+{
+  "name": "stremio-custom-row-factory",
+  "version": "1.0.0",
+  "description": "A Stremio addon that creates N custom home-screen rows from a JSON config.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+    "build": "node scripts/build.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "stremio-addon-sdk": "^1.6.10"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}

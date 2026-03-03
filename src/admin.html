@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stremio Row Factory · Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface2: #22263a;
+            --border: #2e3350;
+            --accent: #7c5ff0;
+            --accent-soft: rgba(124, 95, 240, 0.15);
+            --accent-hover: #9477f5;
+            --green: #22c55e;
+            --green-soft: rgba(34, 197, 94, 0.12);
+            --red: #ef4444;
+            --red-soft: rgba(239, 68, 68, 0.12);
+            --yellow: #f59e0b;
+            --yellow-soft: rgba(245, 158, 11, 0.12);
+            --text: #e2e8f0;
+            --text-muted: #64748b;
+            --text-soft: #94a3b8;
+            --radius: 10px;
+            --radius-sm: 6px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 24px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 34px;
+            height: 34px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .logo-text {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .logo-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .header-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #stremio-badge {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        #stremio-badge.logged-in {
+            background: var(--green-soft);
+            border-color: var(--green);
+            color: var(--green);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 2px;
+            padding: 0 24px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .tab {
+            padding: 11px 16px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            border-bottom: 2px solid transparent;
+            transition: color .2s, border-color .2s;
+            user-select: none;
+        }
+
+        .tab:hover {
+            color: var(--text-soft);
+        }
+
+        .tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        /* Workspace */
+        .workspace {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .panel {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: none;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .panel.active {
+            display: flex;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all .18s;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(124, 95, 240, 0.4);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .btn-ghost:hover {
+            background: var(--surface2);
+            color: var(--text);
+        }
+
+        .btn-danger {
+            background: var(--red-soft);
+            color: var(--red);
+            border: 1px solid transparent;
+        }
+
+        .btn-danger:hover {
+            background: var(--red);
+            color: #fff;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .btn-save {
+            background: var(--green);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .btn-save:hover {
+            background: #16a34a;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.35);
+        }
+
+        .btn-add-lib {
+            background: var(--accent-soft);
+            color: var(--accent);
+            border: 1px solid rgba(124, 95, 240, 0.25);
+        }
+
+        .btn-add-lib:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-add-lib.added {
+            background: var(--green-soft);
+            color: var(--green);
+            border-color: transparent;
+            cursor: default;
+        }
+
+        .btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Section header */
+        .section-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .section-header-left .section-title {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .section-header-left .section-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .card-body {
+            padding: 16px 20px;
+        }
+
+        /* Row items */
+        .row-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 16px;
+            border-bottom: 1px solid var(--border);
+            transition: background .15s;
+        }
+
+        .row-item:last-child {
+            border-bottom: none;
+        }
+
+        .row-item:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .drag-handle {
+            color: var(--border);
+            cursor: grab;
+            font-size: 16px;
+            user-select: none;
+            flex-shrink: 0;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .row-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .row-name-line {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            border-radius: 20px;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .badge-count {
+            background: var(--green-soft);
+            color: var(--green);
+        }
+
+        .badge-type {
+            background: var(--surface2);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            font-family: monospace;
+            font-size: 10px;
+        }
+
+        .badge-slug {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            font-family: monospace;
+            font-size: 10px;
+        }
+
+        .row-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .tag-chip {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2px 7px;
+            font-size: 11px;
+            color: var(--text-soft);
+            font-family: monospace;
+        }
+
+        .row-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .row-item.dragging {
+            opacity: 0.35;
+        }
+
+        .row-item.drag-over {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+        }
+
+        /* Library browser */
+        /* Discovery toolbar */
+        .discovery-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            background: var(--surface);
+            padding: 16px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .discovery-select-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .discovery-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .lib-filter {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 14px;
+            padding: 10px 12px;
+            outline: none;
+            font-family: inherit;
+            cursor: pointer;
+            width: 100%;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+
+        .lib-filter:focus {
+            border-color: var(--accent);
+        }
+
+        .lib-search-wrapper {
+            width: 100%;
+            margin-top: 12px;
+            position: relative;
+        }
+
+        .lib-search {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 14px;
+            padding: 10px 12px 10px 40px;
+            outline: none;
+            font-family: inherit;
+            transition: border-color .2s;
+        }
+
+        .lib-search:focus {
+            border-color: var(--accent);
+        }
+
+        .lib-search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .lib-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+        }
+
+        .lib-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: border-color .2s, transform .15s;
+            cursor: default;
+        }
+
+        .lib-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .lib-card.selected {
+            border-color: var(--green);
+            border-width: 2px;
+        }
+
+        .lib-selection-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--green);
+            color: #fff;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all .2s;
+        }
+
+        .lib-card.selected .lib-selection-badge {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .lib-card-thumb {
+            width: 100%;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+            background: var(--surface2);
+            display: block;
+        }
+
+        .lib-card-thumb-ph {
+            width: 100%;
+            aspect-ratio: 2/3;
+            background: var(--surface2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: var(--border);
+        }
+
+        .lib-card-body {
+            padding: 8px 10px;
+        }
+
+        .lib-card-title {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .lib-card-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .lib-card-btn {
+            width: 100%;
+            text-align: center;
+        }
+
+        .lib-card-btn .btn {
+            width: 100%;
+            justify-content: center;
+            font-size: 11px;
+            padding: 5px 8px;
+        }
+
+        .lib-login-box {
+            max-width: 380px;
+            margin: 40px auto;
+        }
+
+        .lib-login-box .card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .lib-login-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .lib-login-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .lib-status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: var(--green-soft);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            color: var(--green);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .2s;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 26px;
+            width: 500px;
+            max-width: calc(100vw - 32px);
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(10px) scale(0.98);
+            transition: transform .2s;
+            box-shadow: var(--shadow);
+        }
+
+        .modal-overlay.open .modal {
+            transform: none;
+        }
+
+        /* Bulk Toolbar */
+        .bulk-toolbar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            z-index: 90;
+            transition: transform .3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+
+        .bulk-toolbar.visible {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .bulk-count {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--green);
+        }
+
+        .bulk-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .modal-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 18px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-soft);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            padding: 8px 11px;
+            transition: border-color .2s;
+            outline: none;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            border-color: var(--accent);
+        }
+
+        .form-textarea {
+            min-height: 64px;
+            resize: vertical;
+        }
+
+        .form-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* Tag pills */
+        .tag-input-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 6px 10px;
+            cursor: text;
+            min-height: 40px;
+            transition: border-color .2s;
+        }
+
+        .tag-input-wrapper:focus-within {
+            border-color: var(--accent);
+        }
+
+        .tag-pill {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--accent-soft);
+            border: 1px solid rgba(124, 95, 240, 0.3);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 11px;
+            color: var(--accent);
+            font-family: monospace;
+        }
+
+        .tag-pill-x {
+            cursor: pointer;
+            opacity: 0.6;
+            font-size: 13px;
+            line-height: 1;
+            padding: 0 2px;
+        }
+
+        .tag-pill-x:hover {
+            opacity: 1;
+        }
+
+        /* Row Editor Items */
+        .row-edit-items {
+            display: grid;
+            gap: 10px;
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .row-edit-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 8px;
+        }
+
+        .row-edit-thumb {
+            width: 40px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            background: var(--surface2);
+        }
+
+        .row-edit-thumb.landscape {
+            height: 22px;
+            aspect-ratio: 16/9;
+        }
+
+        .row-edit-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .row-edit-title {
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .row-edit-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .btn-icon {
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        /* Settings grid */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        @media (max-width: 540px) {
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .lib-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            }
+        }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 11px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: var(--shadow);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all .3s;
+            pointer-events: none;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #toast.show {
+            transform: none;
+            opacity: 1;
+        }
+
+        #toast.success {
+            border-color: var(--green);
+            color: var(--green);
+        }
+
+        #toast.error {
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        /* Empty */
+        .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .empty-text {
+            font-size: 13px;
+        }
+
+        /* Inline row selector for add-stream modal */
+        .row-selector-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .row-sel-chip {
+            padding: 5px 10px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--surface2);
+            font-size: 12px;
+            cursor: pointer;
+            color: var(--text-soft);
+            transition: all .15s;
+        }
+
+        .row-sel-chip.selected {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <div class="logo-icon">📺</div>
+                <div>
+                    <div class="logo-text">Row Factory</div>
+                    <div class="logo-sub">Stremio Admin</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div id="stremio-badge">Not connected</div>
+                <span id="save-status" style="font-size:12px;color:var(--text-muted);"></span>
+                <button class="btn btn-save" id="btn-save" onclick="saveAll()">💾 Save</button>
+            </div>
+        </header>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" id="tab-rows" onclick="switchTab('rows')">🎬 Rows</div>
+
+            <div class="tab" id="tab-library" onclick="switchTab('library')">🎞 Stremio Library</div>
+            <div class="tab" id="tab-settings" onclick="switchTab('settings')">⚙️ Settings</div>
+        </div>
+
+        <!-- Workspace -->
+        <div class="workspace">
+
+            <!-- ════ ROWS ════ -->
+            <div class="panel active" id="panel-rows">
+                <div class="section-header">
+                    <div class="section-header-left">
+                        <div class="section-title">Custom Rows</div>
+                        <div class="section-desc">Each row = one category on your Stremio home screen. Drag to reorder.
+                        </div>
+                    </div>
+                    <div class="section-actions">
+                        <button class="btn btn-primary" onclick="openRowModal()">+ Add Row</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div id="rows-list">
+                        <div class="empty">
+                            <div class="empty-icon">⏳</div>
+                            <div class="empty-text">Loading…</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ════ LIBRARY ════ -->
+            <div class="panel" id="panel-library">
+                <div id="lib-login-section">
+                    <div class="lib-login-box">
+                        <div class="card card-body">
+                            <div class="lib-login-title">🔐 Connect Stremio Account</div>
+                            <div class="lib-login-desc">Log in to browse your Stremio library and add movies &amp;
+                                series directly to your rows. Your password is never stored.</div>
+                            <div class="form-group" style="margin-bottom:0">
+                                <label class="form-label">Email</label>
+                                <input class="form-input" id="lib-email" type="email" placeholder="your@email.com" />
+                            </div>
+                            <div class="form-group" style="margin-bottom:0">
+                                <label class="form-label">Password</label>
+                                <input class="form-input" id="lib-password" type="password" placeholder="••••••••"
+                                    onkeydown="if(event.key==='Enter')stremioLogin()" />
+                            </div>
+                            <button class="btn btn-primary" style="width:100%;justify-content:center;" id="btn-login"
+                                onclick="stremioLogin()">Connect Account</button>
+                            <div id="login-error" style="color:var(--red);font-size:12px;display:none;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="lib-browse-section" style="display:none;">
+                    <div id="lib-status-bar" class="lib-status-bar">
+                        <span>✅ Connected as <strong id="lib-email-display"></strong></span>
+                        <button class="btn btn-ghost btn-sm" onclick="stremioLogout()">Disconnect</button>
+                    </div>
+
+                    <div class="discovery-controls" style="margin-top:16px;">
+                        <div class="discovery-select-group">
+                            <label class="discovery-label">Type</label>
+                            <select class="lib-filter" id="lib-type-select" onchange="onTypeChange()">
+                                <option value="movie">Movies</option>
+                                <option value="series">Series</option>
+                            </select>
+                        </div>
+                        <div class="discovery-select-group">
+                            <label class="discovery-label">Source</label>
+                            <select class="lib-filter" id="lib-source-select" onchange="onSourceChange()">
+                                <option value="library">My Library</option>
+                            </select>
+                        </div>
+                        <div class="discovery-select-group">
+                            <label class="discovery-label">Genre / Catalog</label>
+                            <select class="lib-filter" id="lib-genre-select" onchange="loadDiscoveryResults()">
+                                <option value="all">All</option>
+                            </select>
+                        </div>
+
+                        <div class="lib-search-wrapper">
+                            <span class="lib-search-icon">🔍</span>
+                            <input class="lib-search" id="lib-search" type="search"
+                                placeholder="Search current results…" oninput="filterDiscovery()" />
+                        </div>
+                    </div>
+
+                    <!-- Bulk Actions Toolbar -->
+                    <div id="bulk-toolbar" class="bulk-toolbar">
+                        <div class="bulk-count"><span id="bulk-count-num">0</span> items selected</div>
+                        <div class="bulk-actions">
+                            <button class="btn btn-ghost btn-sm" onclick="selectAllDiscovery()">Select All</button>
+                            <button class="btn btn-ghost btn-sm" onclick="clearDiscoverySelection()">Clear</button>
+                            <button class="btn btn-primary btn-sm" onclick="openBulkAssignModal()">+ Add Selected to
+                                Row</button>
+                        </div>
+                    </div>
+
+                    <div id="lib-grid" class="lib-grid" style="margin-top:16px;">
+                        <div class="empty" style="grid-column:1/-1">
+                            <div class="empty-icon">⏳</div>
+                            <div class="empty-text">Loading…</div>
+                        </div>
+                    </div>
+                    <div id="lib-load-more" style="display:none;text-align:center;margin-top:12px;">
+                        <button class="btn btn-ghost" onclick="loadMoreLibrary()">Load more…</button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ════ SETTINGS ════ -->
+            <div class="panel" id="panel-settings">
+                <div class="section-header">
+                    <div class="section-header-left">
+                        <div class="section-title">Addon Settings</div>
+                        <div class="section-desc">Metadata shown in Stremio's addon browser.</div>
+                    </div>
+                </div>
+                <div class="card card-body">
+                    <div class="settings-grid">
+                        <div class="form-group">
+                            <label class="form-label">Addon ID</label>
+                            <input class="form-input" id="set-id" placeholder="com.myrows.custom" />
+                            <div class="form-hint">Unique ID — don't change after installing.</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Version</label>
+                            <input class="form-input" id="set-version" placeholder="1.0.0" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Display Name</label>
+                        <input class="form-input" id="set-name" placeholder="My Custom Rows" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <input class="form-input" id="set-description" placeholder="Personal curated rows…" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Install URL <span
+                                style="font-weight:400;color:var(--text-muted)">(paste into Stremio)</span></label>
+                        <input class="form-input" id="set-install-url" readonly
+                            style="font-family:monospace;font-size:12px;cursor:pointer;" onclick="this.select()" />
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /workspace -->
+    </div><!-- /app -->
+
+    <!-- ══ ROW MODAL ══ -->
+    <div class="modal-overlay" id="row-modal">
+        <div class="modal">
+            <div class="modal-title" id="row-modal-title">Add Row</div>
+            <div class="form-group">
+                <label class="form-label">Row Name</label>
+                <input class="form-input" id="row-name" placeholder="e.g. UFC Replays" oninput="updateRowPreview()" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Content Type</label>
+                <select class="form-input" id="row-content-type" onchange="updateRowPreview(true)">
+
+                    <option value="movie">Movie (from Stremio library)</option>
+                    <option value="series">Series (from Stremio library)</option>
+                    <option value="tv">TV / IPTV (from external addons)</option>
+                </select>
+                <div class="form-hint">Streams come from your installed addons.</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Items in this Row <span style="font-weight:400;color:var(--text-muted)">(Drag
+                        to reorder in Stremio)</span></label>
+                <div id="row-items-list" class="row-edit-items">
+                    <!-- Dynamic -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal('row-modal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveRow()">Save Row</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ ADD-TO-ROW MODAL (from library) ══ -->
+    <div class="modal-overlay" id="assign-modal">
+        <div class="modal" style="max-width:420px;">
+            <div class="modal-title">Add to Row</div>
+            <div style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">
+                Choose which row "<strong id="assign-item-title"></strong>" should appear in. It will use its existing
+                tags or you can assign tags below.
+            </div>
+            <div class="form-group">
+                <label class="form-label">Select Row(s)</label>
+                <div id="assign-row-selector" class="row-selector-grid">
+                    <!-- Dynamic -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" onclick="removeFromLibrary()" style="margin-right:auto;">🗑 Remove from
+                    Library</button>
+                <button class="btn btn-ghost" onclick="closeModal('assign-modal')">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmAssign()">Update Rows</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast"></div>
+
+    <script>
+        'use strict';
+
+        function esc(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // ─── State ────────────────────────────────────────────────────────────────────
+        let config = { addon: { id: '', version: '1.0.0', name: '', description: '' }, rows: [] };
+        let editingRowIdx = -1;
+        let assignItem = null;
+        let selectedRowIds = [];
+        let allAddons = [];
+        let discoveryResults = [], filteredResults = [];
+        let libSkip = 0;
+        let selectedItems = new Map(); // id -> item object
+        let isBulkAssign = false;
+        let dirty = false;
+
+        // ─── Tabs ─────────────────────────────────────────────────────────────────────
+        function switchTab(tab) {
+            ['rows', 'library', 'settings'].forEach(t => {
+                const tabEl = document.getElementById('tab-' + t);
+                const panelEl = document.getElementById('panel-' + t);
+                if (tabEl) tabEl.classList.toggle('active', t === tab);
+                if (panelEl) panelEl.classList.toggle('active', t === tab);
+            });
+            if (tab === 'library') loadDiscoveryOptions();
+        }
+
+        function renderAll() { renderRows(); renderSettings(); }
+
+        // ─── Slugify ──────────────────────────────────────────────────────────────────
+        function slugify(n) { return n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
+
+        // ─── Rows ─────────────────────────────────────────────────────────────────────
+        function streamCount(row) {
+            return (row.items || []).length;
+        }
+
+        function renderRows() {
+            const el = document.getElementById('rows-list');
+            if (!config.rows.length) { el.innerHTML = `<div class="empty"><div class="empty-icon">🎬</div><div class="empty-text">No rows yet — add one!</div></div>`; return; }
+            el.innerHTML = config.rows.map((row, i) => {
+                const ct = row.contentType || 'movie';
+                const count = (row.items || []).length;
+                return `<div class="row-item" draggable="true" id="ri-${i}"
+      ondragstart="dragStart(${i})" ondragover="dragOver(event,${i})"
+      ondrop="drop(event,${i})" ondragleave="dragLeave(event)">
+      <span class="drag-handle">⋮⋮</span>
+      <div class="row-info">
+        <div class="row-name-line">
+          ${esc(row.name)}
+          <span class="badge badge-count">${count} item${count !== 1 ? 's' : ''}</span>
+          <span class="badge badge-type">${ct}</span>
+          <span class="badge badge-slug">${row.id}</span>
+        </div>
+      </div>
+      <div class="row-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openRowModal(${i})">✏️ Edit Row & Reorder</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRow(${i})">🗑</button>
+      </div>
+    </div>`;
+            }).join('');
+        }
+
+        let dragIdx = -1;
+        function dragStart(i) { dragIdx = i; document.getElementById('ri-' + i).classList.add('dragging'); }
+        function dragOver(e, i) { e.preventDefault(); if (i !== dragIdx) document.getElementById('ri-' + i).classList.add('drag-over'); }
+        function dragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+        function drop(e, i) {
+            e.preventDefault();
+            document.querySelectorAll('.row-item').forEach(el => el.classList.remove('drag-over', 'dragging'));
+            if (i === dragIdx) return;
+            const moved = config.rows.splice(dragIdx, 1)[0]; config.rows.splice(i, 0, moved);
+            markDirty(); renderRows();
+        }
+
+        let tempRowItems = [];
+        function openRowModal(idx = -1) {
+            editingRowIdx = idx;
+            const row = idx >= 0 ? config.rows[idx] : { id: 'row-' + Date.now(), name: '', items: [], contentType: 'movie' };
+            document.getElementById('row-modal-title').textContent = idx >= 0 ? 'Edit Row' : 'Add Row';
+            document.getElementById('row-name').value = row.name;
+            document.getElementById('row-content-type').value = row.contentType || 'movie';
+            tempRowItems = [...(row.items || [])];
+            renderRowItemsList();
+            openModal('row-modal');
+            setTimeout(() => document.getElementById('row-name').focus(), 80);
+        }
+
+        function updateRowPreview() { }
+
+        function renderRowItemsList() {
+            const el = document.getElementById('row-items-list');
+            if (!tempRowItems.length) { el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:10px;text-align:center;">Row is empty. Add items from the Library tab.</div>'; return; }
+
+            el.innerHTML = tempRowItems.map((s, i) => {
+                if (!s) return '';
+                const isLandscape = s.type === 'tv';
+                return `
+                <div class="row-edit-item">
+                    <img class="row-edit-thumb ${isLandscape ? 'landscape' : ''}" src="${esc(s.thumbnail)}" onerror="this.src='';this.style.background='var(--surface2)'">
+                    <div class="row-edit-info">
+                        <div class="row-edit-title">${esc(s.title)}</div>
+                    </div>
+                    <div class="row-edit-actions">
+                        <button class="btn btn-ghost btn-icon" onclick="moveRowItem(${i}, -1)" ${i === 0 ? 'disabled' : ''}>↑</button>
+                        <button class="btn btn-ghost btn-icon" onclick="moveRowItem(${i}, 1)" ${i === tempRowItems.length - 1 ? 'disabled' : ''}>↓</button>
+                        <button class="btn btn-danger btn-icon" onclick="removeRowItem(${i})">×</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function moveRowItem(i, dir) {
+            const item = tempRowItems.splice(i, 1)[0];
+            tempRowItems.splice(i + dir, 0, item);
+            renderRowItemsList();
+        }
+
+        function removeRowItem(i) {
+            tempRowItems.splice(i, 1);
+            renderRowItemsList();
+        }
+
+        function saveRow() {
+            const name = document.getElementById('row-name').value.trim();
+            if (!name) { toast('Row name is required', 'error'); return; }
+            const contentType = document.getElementById('row-content-type').value;
+            const rowId = editingRowIdx >= 0 ? config.rows[editingRowIdx].id : slugify(name) || 'row-' + Date.now();
+
+            const row = { id: rowId, name, items: tempRowItems, contentType, posterShape: 'square' };
+            if (editingRowIdx >= 0) config.rows[editingRowIdx] = row; else config.rows.push(row);
+            closeModal('row-modal'); markDirty(); renderRows();
+        }
+
+        function deleteRow(i) {
+            if (!confirm(`Delete row "${config.rows[i].name}"?`)) return;
+            config.rows.splice(i, 1); markDirty(); renderRows();
+        }
+
+        // ─── Missing Functions ──────────────────────────────────────────────────────────
+        async function stremioLogin() {
+            const email = document.getElementById('lib-email').value;
+            const password = document.getElementById('lib-password').value;
+            const btn = document.getElementById('btn-login');
+            const err = document.getElementById('login-error');
+            if (!email || !password) { err.textContent = 'Email and password required'; err.style.display = 'block'; return; }
+            err.style.display = 'none';
+            btn.textContent = '⏳ Connecting…'; btn.disabled = true;
+            try {
+                const d = await fetch('/api/stremio/login', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                }).then(r => r.json());
+                if (d.error) throw new Error(d.error);
+                updateAuthUI({ loggedIn: true, email: d.email });
+                if (d.ok) loadDiscoveryOptions();
+            } catch (e) {
+                err.textContent = e.message; err.style.display = 'block';
+            } finally {
+                btn.textContent = 'Connect Account'; btn.disabled = false;
+            }
+        }
+
+        async function stremioLogout() {
+            await fetch('/api/stremio/logout', { method: 'POST' });
+            updateAuthUI({ loggedIn: false, email: null });
+            document.getElementById('lib-grid').innerHTML = '';
+        }
+
+        function updateAuthUI(status) {
+            const badge = document.getElementById('stremio-badge');
+            const loginSec = document.getElementById('lib-login-section');
+            const browseSec = document.getElementById('lib-browse-section');
+            const emailDisp = document.getElementById('lib-email-display');
+
+            if (status && (status.loggedIn || status.email)) {
+                badge.textContent = '🟢 Connected';
+                badge.style.color = 'var(--green)';
+                loginSec.style.display = 'none';
+                browseSec.style.display = 'block';
+                emailDisp.textContent = status.email ? status.email : 'User';
+                loadDiscoveryOptions();
+            } else {
+                badge.textContent = '🔴 Not connected';
+                badge.style.color = 'var(--text-muted)';
+                loginSec.style.display = 'block';
+                browseSec.style.display = 'none';
+            }
+        }
+
+        async function loadDiscoveryOptions() {
+            if (allAddons.length > 0) return;
+            try {
+                const d = await fetch('/api/stremio/addons').then(r => r.json());
+                allAddons = d.addons || [];
+
+                // Populate Types
+                const allowed = { 'movie': 'Movies', 'series': 'Series', 'tv': 'TV Channels' };
+                const typeSel = document.getElementById('lib-type-select');
+                const currentVal = typeSel.value;
+                typeSel.innerHTML = Object.entries(allowed).map(([id, label]) =>
+                    `<option value="${id}" ${id === currentVal ? 'selected' : ''}>${label}</option>`
+                ).join('');
+
+                onTypeChange();
+            } catch (e) {
+                toast('Failed to load addons: ' + e.message, 'error');
+            }
+        }
+
+        function onTypeChange() {
+            clearDiscoverySelection();
+            const type = document.getElementById('lib-type-select').value;
+            const sourceSel = document.getElementById('lib-source-select');
+
+            // Deduplicate providers by transportUrl and exclude "this" addon
+            const seen = new Set();
+            const myManifestUrl = location.origin + '/manifest.json';
+            const providers = allAddons.filter(a => {
+                const supported = (a.manifest.types || []).includes(type);
+                const isMe = a.transportUrl === myManifestUrl || a.manifest.id === config.addon.id;
+                if (supported && !isMe && !seen.has(a.transportUrl)) {
+                    seen.add(a.transportUrl);
+                    return true;
+                }
+                return false;
+            });
+
+            sourceSel.innerHTML = providers.map(a => `<option value="${esc(a.transportUrl)}">${esc(a.manifest.name)}</option>`).join('') || '<option value="">No sources found</option>';
+
+            onSourceChange();
+        }
+
+        function onSourceChange() {
+            clearDiscoverySelection();
+            const type = document.getElementById('lib-type-select').value;
+            const source = document.getElementById('lib-source-select').value;
+            const genreSel = document.getElementById('lib-genre-select');
+
+            const addon = allAddons.find(a => a.transportUrl === source);
+            if (!addon) {
+                genreSel.innerHTML = '<option value="">N/A</option>';
+                return;
+            }
+
+            const catalogs = (addon.manifest.catalogs || []).filter(c => c.type === type);
+            if (!catalogs.length) {
+                genreSel.innerHTML = '<option value="default">Default Catalog</option>';
+            } else {
+                let html = '';
+                catalogs.forEach(c => {
+                    // Add the base catalog
+                    html += `<option value="${esc(c.id)}">${esc(c.name || 'Default')}</option>`;
+
+                    // Check for genres in extra
+                    const genreExtra = (c.extra || []).find(e => e.name === 'genre');
+                    if (genreExtra && genreExtra.options) {
+                        genreExtra.options.forEach(g => {
+                            html += `<option value="${esc(c.id)}/genre=${esc(encodeURIComponent(g))}">${esc(g)}</option>`;
+                        });
+                    }
+                });
+                genreSel.innerHTML = html;
+            }
+
+            loadDiscoveryResults();
+        }
+
+        async function loadDiscoveryResults() {
+            const grid = document.getElementById('lib-grid');
+            const type = document.getElementById('lib-type-select').value;
+            const source = document.getElementById('lib-source-select').value;
+            const catalogId = document.getElementById('lib-genre-select').value;
+
+            if (!source) {
+                grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-icon">📂</div><div class="empty-text">Select a source to browse.</div></div>';
+                return;
+            }
+
+            grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-icon">⏳</div><div class="empty-text">Loading items…</div></div>';
+            libSkip = 0;
+
+            try {
+                // Fix URL: Strip manifest.json and ensure correct catalog path
+                let baseUrl = source.replace('/manifest.json', '');
+                if (!baseUrl.endsWith('/')) baseUrl += '/';
+
+                // URL Construction: catalog/{type}/{catalogId}.json
+                // If catalogId is e.g. "mycat/genre=Action", it becomes .../catalog/tv/mycat/genre=Action.json
+                const url = `${baseUrl}catalog/${type}/${catalogId}.json`;
+                const d = await fetch(`/api/stremio/proxy-catalog?url=${encodeURIComponent(url)}`).then(r => r.json());
+                if (d.error) throw new Error(d.error);
+
+                discoveryResults = (d.metas || d.items || []).map(m => ({
+                    id: m.id || m._id, type: m.type, title: m.name,
+                    thumbnail: m.poster || '', description: m.description || ''
+                }));
+                filterDiscovery();
+            } catch (e) {
+                grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">❌</div><div class="empty-text">${esc(e.message)}</div></div>`;
+            }
+        }
+
+        function filterDiscovery() {
+            const q = document.getElementById('lib-search').value.toLowerCase();
+            filteredResults = discoveryResults.filter(i => {
+                if (q && !i.title.toLowerCase().includes(q)) return false;
+                return true;
+            });
+            libSkip = 0;
+            renderDiscoveryGrid();
+        }
+
+        function renderDiscoveryGrid() {
+            const grid = document.getElementById('lib-grid');
+            const btnMore = document.getElementById('lib-load-more');
+
+            if (!filteredResults.length) {
+                grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-icon">📭</div><div class="empty-text">No items found.</div></div>';
+                btnMore.style.display = 'none';
+                return;
+            }
+
+            const chunk = filteredResults.slice(libSkip, libSkip + 40);
+            const html = chunk.map(item => {
+                const added = isInLibrary(item.id);
+                const isSelected = selectedItems.has(item.id);
+                return `<div class="lib-card ${isSelected ? 'selected' : ''}" onclick="toggleSelection(event, ${esc(JSON.stringify(item))})">
+                    <div class="lib-selection-badge">✓</div>
+                    <img class="lib-card-thumb" src="${esc(item.thumbnail)}" loading="lazy" onerror="this.src='';this.className='lib-card-thumb-ph';this.textContent='📺'">
+                    <div class="lib-card-body">
+                        <div class="lib-card-title">${esc(item.title)}</div>
+                        <div class="lib-card-btn">
+                            ${added
+                        ? `<button class="btn btn-ghost btn-sm" onclick='event.stopPropagation();openAssignModal(${JSON.stringify(item)})'>⚙️ Manage</button>`
+                        : `<button class="btn btn-add-lib btn-sm" onclick='event.stopPropagation();openAssignModal(${JSON.stringify(item)})'>+ Add</button>`}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            if (libSkip === 0) grid.innerHTML = html; else grid.innerHTML += html;
+            libSkip += 40;
+            btnMore.style.display = libSkip < filteredResults.length ? 'block' : 'none';
+        }
+
+        function toggleSelection(e, item) {
+            if (selectedItems.has(item.id)) selectedItems.delete(item.id);
+            else selectedItems.set(item.id, item);
+            updateBulkToolbar();
+            // Re-render only changed card if possible, but full render is safer for now
+            // and we only render the grid, not the whole page.
+            // Let's just toggle class for performance
+            e.currentTarget.classList.toggle('selected');
+        }
+
+        function selectAllDiscovery() {
+            filteredResults.forEach(item => selectedItems.set(item.id, item));
+            updateBulkToolbar();
+            renderDiscoveryGrid_Full();
+        }
+
+        function clearDiscoverySelection() {
+            selectedItems.clear();
+            updateBulkToolbar();
+            renderDiscoveryGrid_Full();
+        }
+
+        function renderDiscoveryGrid_Full() {
+            const currentSkip = libSkip;
+            libSkip = 0;
+            const grid = document.getElementById('lib-grid');
+            grid.innerHTML = '';
+            // We need to render up to the current skip to maintain position
+            for (let i = 0; i < currentSkip; i += 40) {
+                renderDiscoveryGrid();
+            }
+        }
+
+        function updateBulkToolbar() {
+            const bar = document.getElementById('bulk-toolbar');
+            const countNum = document.getElementById('bulk-count-num');
+            const count = selectedItems.size;
+            countNum.textContent = count;
+            bar.classList.toggle('visible', count > 0);
+        }
+
+        function loadMoreLibrary() {
+            renderDiscoveryGrid();
+        }
+
+        function isInLibrary(id) {
+            return config.rows.some(r => (r.items || []).some(i => i.id === id));
+        }
+
+        function openAssignModal(item) {
+            assignItem = item;
+            isBulkAssign = false;
+            document.getElementById('assign-item-title').textContent = item.title;
+            document.querySelector('#assign-modal .modal-title').textContent = 'Add to Row';
+            document.querySelector('#assign-modal .btn-danger').style.display = 'block';
+            selectedRowIds = config.rows.filter(r => (r.items || []).some(i => i.id === item.id)).map(r => r.id);
+            renderAssignRowSelector();
+            openModal('assign-modal');
+        }
+
+        function openBulkAssignModal() {
+            isBulkAssign = true;
+            assignItem = null;
+            const count = selectedItems.size;
+            document.getElementById('assign-item-title').textContent = `${count} selected items`;
+            document.querySelector('#assign-modal .modal-title').textContent = 'Bulk Add to Row';
+            document.querySelector('#assign-modal .btn-danger').style.display = 'none';
+            selectedRowIds = [];
+            renderAssignRowSelector();
+            openModal('assign-modal');
+        }
+
+        function renderAssignRowSelector() {
+            const el = document.getElementById('assign-row-selector');
+            if (!config.rows.length) {
+                el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);">No rows exist. Create a row first!</div>';
+                return;
+            }
+            el.innerHTML = config.rows.map(r => {
+                // Can only add movie/series to movie/series rows, etc.
+                const isSelected = selectedRowIds.includes(r.id);
+                return `<div class="row-sel-chip ${isSelected ? 'selected' : ''}" onclick="toggleRowAssign('${r.id}')">
+            ${esc(r.name)}
+        </div>`;
+            }).join('');
+        }
+
+        function toggleRowAssign(rId) {
+            const idx = selectedRowIds.indexOf(rId);
+            if (idx >= 0) selectedRowIds.splice(idx, 1);
+            else selectedRowIds.push(rId);
+            renderAssignRowSelector();
+        }
+
+        function confirmAssign() {
+            if (isBulkAssign) {
+                confirmBulkAssign();
+                return;
+            }
+            if (!assignItem) return;
+            const entry = {
+                id: assignItem.id, type: assignItem.type, title: assignItem.title,
+                thumbnail: assignItem.thumbnail || '', description: assignItem.description || ''
+            };
+            config.rows.forEach(r => {
+                const idx = (r.items || []).findIndex(i => i.id === assignItem.id);
+                const hasItem = idx >= 0;
+                const shouldHave = selectedRowIds.includes(r.id);
+                if (shouldHave && !hasItem) r.items.push(entry);
+                else if (!shouldHave && hasItem) r.items.splice(idx, 1);
+            });
+            closeModal('assign-modal');
+            markDirty(); renderRows();
+            renderDiscoveryGrid_Full(); // Refresh full grid to update all buttons
+            toast(`"${assignItem.title}" updated!`, 'success');
+        }
+
+        function confirmBulkAssign() {
+            if (selectedItems.size === 0) return;
+            const targetRows = config.rows.filter(r => selectedRowIds.includes(r.id));
+            if (targetRows.length === 0) {
+                toast('Please select at least one row', 'error');
+                return;
+            }
+
+            selectedItems.forEach(item => {
+                const entry = {
+                    id: item.id, type: item.type, title: item.title,
+                    thumbnail: item.thumbnail || '', description: item.description || ''
+                };
+                targetRows.forEach(r => {
+                    const exists = (r.items || []).some(i => i.id === item.id);
+                    if (!exists) r.items.push(entry);
+                });
+            });
+
+            closeModal('assign-modal');
+            clearDiscoverySelection();
+            markDirty(); renderRows();
+            renderDiscoveryGrid_Full();
+            toast(`Added ${selectedItems.size} items to selected rows!`, 'success');
+        }
+
+        function removeFromLibrary() {
+            if (!assignItem || !confirm(`Remove "${assignItem.title}" from all rows?`)) return;
+            const id = assignItem.id;
+            config.rows.forEach(r => {
+                r.items = (r.items || []).filter(i => i.id !== id);
+            });
+            closeModal('assign-modal');
+            markDirty(); renderRows();
+            renderDiscoveryGrid(); // Refresh the grid to update buttons
+            toast(`"${assignItem.title}" removed`, 'success');
+        }
+
+        function renderSettings() {
+            document.getElementById('set-id').value = config.addon.id || '';
+            document.getElementById('set-version').value = config.addon.version || '1.0.0';
+            document.getElementById('set-name').value = config.addon.name || '';
+            document.getElementById('set-description').value = config.addon.description || '';
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.add('open');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('open');
+        }
+
+
+        // ─── Init ─────────────────────────────────────────────────────────────────────
+        async function init() {
+            // Safety Check: Ensure we aren't on Live Server port 5500
+            if (location.port === '5500') {
+                alert("⚠️ WRONG PORT: You are using VS Code Live Server (Port 5500).\n\nPlease use http://127.0.0.1:7000/admin instead.");
+                return;
+            }
+            try {
+                const [c, authStatus] = await Promise.all([
+                    fetch('/api/config').then(r => r.json()),
+                    fetch('/api/stremio/status').then(r => r.json()),
+                ]);
+                config = c;
+                renderAll();
+                document.getElementById('set-install-url').value = location.origin + '/manifest.json';
+                updateAuthUI(authStatus);
+            } catch (e) { toast('Failed to load: ' + e.message, 'error'); }
+        }
+
+        function collectSettings() {
+            config.addon.id = document.getElementById('set-id').value.trim();
+            config.addon.version = document.getElementById('set-version').value.trim();
+            config.addon.name = document.getElementById('set-name').value.trim();
+            config.addon.description = document.getElementById('set-description').value.trim();
+        }
+
+        // ─── Save All ─────────────────────────────────────────────────────────────────────
+        function markDirty() {
+            dirty = true;
+            document.getElementById('save-status').textContent = '● Unsaved';
+            document.getElementById('save-status').style.color = 'var(--yellow)';
+        }
+
+        async function saveAll() {
+            collectSettings();
+            const btn = document.getElementById('btn-save');
+            btn.disabled = true; btn.textContent = '⏳ Saving…';
+            try {
+                await fetch('/api/config', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(config) });
+                dirty = false;
+                document.getElementById('save-status').textContent = 'Saved ✓';
+                document.getElementById('save-status').style.color = 'var(--green)';
+                setTimeout(() => { document.getElementById('save-status').textContent = ''; }, 3000);
+                toast('Saved! Restart the server to apply changes.', 'success');
+            } catch (e) { toast('Save failed: ' + e.message, 'error'); }
+            finally { btn.disabled = false; btn.textContent = '💾 Save'; }
+        }
+
+        // ─── Toast ────────────────────────────────────────────────────────────────────
+        let toastTimer;
+        function toast(msg, type = 'success') {
+            const el = document.getElementById('toast');
+            el.textContent = (type === 'success' ? '✅ ' : '❌ ') + msg;
+            el.className = 'show ' + type;
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { el.className = ''; }, 4000);
+        }
+
+        // ─── Escape ───────────────────────────────────────────────────────────────────
+        function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+        window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+        // ─── Addon Browser ───────────────────────────────────────────────────────────
+        let libMode = 'library'; // 'library' or 'addons'
+        let userAddons = [];
+
+        function switchLibMode(mode) {
+            libMode = mode;
+            document.getElementById('lib-tab-my').className = 'tab' + (mode === 'library' ? ' active' : '');
+            document.getElementById('lib-tab-addons').className = 'tab' + (mode === 'addons' ? ' active' : '');
+            document.getElementById('lib-mode-library').style.display = mode === 'library' ? '' : 'none';
+            document.getElementById('lib-mode-addons').style.display = mode === 'addons' ? '' : 'none';
+            document.getElementById('lib-load-more').style.display = 'none';
+            if (mode === 'library') renderLibrary();
+            else renderAddonCatalog([]); // Clear/Reset
+        }
+
+        async function loadAddons() {
+            try {
+                const d = await fetch('/api/stremio/addons').then(r => r.json());
+                userAddons = d.addons || [];
+                const sel = document.getElementById('lib-addon-select');
+                sel.innerHTML = '<option value="">Select an Addon…</option>' +
+                    userAddons.map((a, i) => `<option value="${i}">${esc(a.manifest.name)}</option>`).join('');
+            } catch (e) { toast('Failed to load addons: ' + e.message, 'error'); }
+        }
+
+        function onAddonSelect() {
+            const idx = document.getElementById('lib-addon-select').value;
+            const sel = document.getElementById('lib-catalog-select');
+            sel.innerHTML = '<option value="">Select a Section…</option>';
+            if (idx === '') return;
+
+            const addon = userAddons[idx];
+            const catalogs = addon.manifest.catalogs || [];
+
+            let html = '';
+            catalogs.forEach(c => {
+                // Base catalog
+                html += `<option value="${esc(c.type)}|${esc(c.id)}">${esc(c.type.toUpperCase())} - ${esc(c.name || c.id)} (All)</option>`;
+
+                // Check for genres/categories in 'extra'
+                const genreExtra = (c.extra || []).find(e => e.name === 'genre' || e.name === 'category');
+                if (genreExtra && genreExtra.options) {
+                    genreExtra.options.forEach(opt => {
+                        html += `<option value="${esc(c.type)}|${esc(c.id)}|${esc(genreExtra.name)}|${esc(opt)}">- ${esc(opt)}</option>`;
+                    });
+                }
+            });
+            sel.innerHTML += html;
+        }
+
+        async function loadAddonCatalog() {
+            const aIdx = document.getElementById('lib-addon-select').value;
+            const cVal = document.getElementById('lib-catalog-select').value;
+            const grid = document.getElementById('lib-grid');
+            if (!aIdx || !cVal) { grid.innerHTML = ''; return; }
+
+            const [type, id, extraName, extraValue] = cVal.split('|');
+            const addon = userAddons[aIdx];
+            grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">⏳</div><div class="empty-text">Fetching catalog…</div></div>`;
+
+            try {
+                // transportUrl ends in /manifest.json, we need /catalog/type/id.json
+                // If extras: /catalog/type/id/extraName=extraValue.json
+                const baseUrl = addon.transportUrl.replace('/manifest.json', '');
+                let catUrl = `${baseUrl}/catalog/${type}/${id}`;
+                if (extraName && extraValue) {
+                    catUrl += `/${extraName}=${encodeURIComponent(extraValue)}`;
+                }
+                catUrl += '.json';
+
+                const d = await fetch(`/api/stremio/proxy-catalog?url=${encodeURIComponent(catUrl)}`).then(r => r.json());
+                addonMetas = d.metas || [];
+                renderAddonCatalog(addonMetas);
+            } catch (e) {
+                grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">❌</div><div class="empty-text">Failed to load catalog: ${esc(e.message)}</div></div>`;
+            }
+        }
+
+        function renderAddonCatalog(metas) {
+            if (libMode !== 'addons') return;
+            const el = document.getElementById('lib-grid');
+            if (!metas.length) {
+                el.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">📭</div><div class="empty-text">No items in this catalog.</div></div>`;
+                return;
+            }
+            el.innerHTML = metas.map(m => {
+                const item = {
+                    id: m.id,
+                    type: m.type,
+                    title: m.name,
+                    thumbnail: m.poster || m.logo || '',
+                    description: m.description || '',
+                };
+                const added = isInLibrary(item.id);
+                return `<div class="lib-card" data-title="${esc(item.title.toLowerCase())}">
+                    <img class="lib-card-thumb" src="${esc(item.thumbnail)}" 
+                         style="aspect-ratio: ${item.type === 'tv' || item.type === 'channel' ? '16/9' : '2/3'}" 
+                         onerror="this.src='';this.className='lib-card-thumb-ph';this.textContent='📺'" loading="lazy" />
+                    <div class="lib-card-body">
+                        <div class="lib-card-title">${esc(item.title)}</div>
+                        <div class="lib-card-btn">
+                            ${added
+                        ? `<button class="btn btn-ghost btn-sm" onclick='openAssignModal(${JSON.stringify(item)})'>⚙️ Manage Row</button>`
+                        : `<button class="btn btn-add-lib btn-sm" onclick='openAssignModal(${JSON.stringify(item)})'>+ Add to Row</button>`}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        init();
+
+    </script>
+</body>
+
+</html>

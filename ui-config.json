@@ -1,0 +1,298 @@
+{
+  "addon": {
+    "id": "com.myaddon",
+    "version": "1.0.0",
+    "name": "My Addon",
+    "description": ""
+  },
+  "rows": [
+    {
+      "id": "sports",
+      "name": "Sports",
+      "items": [
+        {
+          "id": "au|SP:nz_sports|SKY.Sport.1.nz|tv",
+          "type": "tv",
+          "title": "SKY Sport 1 NZ",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/sky-sport-1-nz1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:nz_sports|SKY.Sport.2.nz|tv",
+          "type": "tv",
+          "title": "SKY Sport 2 NZ",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/sky-sport-2-nz1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:nz_sports|SKY.Sport.3.nz|tv",
+          "type": "tv",
+          "title": "SKY Sport 3 NZ",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/sky-sport-3-nz1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:au_sports|FoxLeague.au|tv",
+          "type": "tv",
+          "title": "Fox Sports 502",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/foxleague-au1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:au_sports|FoxSports503.au|tv",
+          "type": "tv",
+          "title": "Fox Sports 503",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/foxsports503-au1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:us_sports|ESPN.HD.us2|tv",
+          "type": "tv",
+          "title": "ESPN",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/espn-us1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:us_sports|ESPNEWS.HD.us2|tv",
+          "type": "tv",
+          "title": "ESPN News",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/espn-news-us1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:uk_sports|SkySpMainEvHD.uk|tv",
+          "type": "tv",
+          "title": "Sky Sports Main Event",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/skyspmainevhd-uk1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:uk_sports|TNT.Sports.1.HD.uk|tv",
+          "type": "tv",
+          "title": "TNT Sports 1",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/tnt-sports-1-hd-uk1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:nz_sports|SKY.Sport.4.nz|tv",
+          "type": "tv",
+          "title": "SKY Sport 4 NZ",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/sky-sport-4-nz1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:nz_sports|SKY.Sport.5.nz|tv",
+          "type": "tv",
+          "title": "SKY Sport 5 NZ",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/sky-sport-5-nz1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:nz_sports|SKY.Sport.6.nz|tv",
+          "type": "tv",
+          "title": "SKY Sport 6 NZ",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/sky-sport-6-nz1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:nz_sports|SKY.Sport.7.nz|tv",
+          "type": "tv",
+          "title": "SKY Sport 7 NZ",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/sky-sport-7-nz1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:au_sports|FoxCricket.au|tv",
+          "type": "tv",
+          "title": "Fox Sports 501",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/foxcricket-au1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:au_sports|FoxFooty.au|tv",
+          "type": "tv",
+          "title": "Fox Sports 504",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/foxfooty-au1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:au_sports|FoxSports505.au|tv",
+          "type": "tv",
+          "title": "Fox Sports 505",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/foxsports505-au1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:au_sports|FoxSports506.au|tv",
+          "type": "tv",
+          "title": "Fox Sports 506",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/foxsports506-au1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:au_sports|FoxSportsMore.au|tv",
+          "type": "tv",
+          "title": "Fox Sports 507",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/foxsportsmore-au1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:us_sports|ESPN2.HD.us2|tv",
+          "type": "tv",
+          "title": "ESPN2",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/espn2-us1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:us_sports|Golf.Channel.HD.us2|tv",
+          "type": "tv",
+          "title": "Golf Channel USA",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/golf-channel-usa-us1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:us_sports|MLB.Network.HD.us2|tv",
+          "type": "tv",
+          "title": "MLB Network",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/mlb-network-us1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:us_sports|NBA.TV.HD.us2|tv",
+          "type": "tv",
+          "title": "NBA TV",
+          "thumbnail": "",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:us_sports|NFL.Network.HD.us2|tv",
+          "type": "tv",
+          "title": "NFL Network",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/nfl-network-us1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:us_sports|NFL.RedZone.HD.us2|tv",
+          "type": "tv",
+          "title": "NFL RedZone",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/nfl-redzone-us1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:us_sports|NHL.Network.HD.us2|tv",
+          "type": "tv",
+          "title": "NHL Network",
+          "thumbnail": "",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:uk_sports|SkySpCricket.HD.uk|tv",
+          "type": "tv",
+          "title": "Sky Sports Cricket",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/skyspcricket-hd-uk1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:uk_sports|SkySp.ActionHD.uk|tv",
+          "type": "tv",
+          "title": "Sky Sports Action",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/skysp-actionhd-uk1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:uk_sports|SkySp.F1.uk|tv",
+          "type": "tv",
+          "title": "Sky Sports F1",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/skysp-f1-uk1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:uk_sports|SkySp.Fball.HD.uk|tv",
+          "type": "tv",
+          "title": "Sky Sports Football",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/skysp-fball-hd-uk1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:uk_sports|SkySp.Golf.HD.uk|tv",
+          "type": "tv",
+          "title": "Sky Sports Golf",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/skysp-golf-hd-uk1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:uk_sports|SkySp.Mix.HD.uk|tv",
+          "type": "tv",
+          "title": "Sky Sports Mix",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/skysp-mix-hd-uk1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:uk_sports|SkySp.News.HD.uk|tv",
+          "type": "tv",
+          "title": "Sky Sports News",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/skysp-news-hd-uk1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:uk_sports|SkySp.PL.HD.uk|tv",
+          "type": "tv",
+          "title": "Sky Sports Premier League",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/skysp-pl-hd-uk1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:uk_sports|SkySp.Racing.HD.uk|tv",
+          "type": "tv",
+          "title": "Sky Sports Racing",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/skysp-racing-hd-uk1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:uk_sports|SkySp.Tennis.HD.uk|tv",
+          "type": "tv",
+          "title": "Sky Sports Tennis",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/skysp-tennis-hd-uk1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:uk_sports|SkySp+HD.uk|tv",
+          "type": "tv",
+          "title": "Sky Sports+",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/skysp-hd-uk1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:uk_sports|TNT.Sports.2.HD.uk|tv",
+          "type": "tv",
+          "title": "TNT Sports 2",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/tnt-sports-2-hd-uk1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:uk_sports|TNT.Sports.3.HD.uk|tv",
+          "type": "tv",
+          "title": "TNT Sports 3",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/tnt-sports-3-hd-uk1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:uk_sports|TNT.Sports.4.HD.uk|tv",
+          "type": "tv",
+          "title": "TNT Sports 4",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/tnt-sports-4-hd-uk1024.png",
+          "description": "Curated"
+        },
+        {
+          "id": "au|SP:uk_sports|TNT.Sports.Ultimate.uk|tv",
+          "type": "tv",
+          "title": "TNT Sports Ultimate",
+          "thumbnail": "https://raw.githubusercontent.com/josharghhh/AU-IPTV_StremioAddon/main/images/tnt-sports-ultimate-uk1024.png",
+          "description": "Curated"
+        }
+      ],
+      "contentType": "tv",
+      "posterShape": "square"
+    }
+  ]
+}
