@@ -4,14 +4,10 @@
  * Produces a slug ID for each row and exports the combined config.
  */
 
-const fs = require('fs');
-const path = require('path');
-
-const ROOT = path.join(__dirname, '..');
+const storage = require('./storage');
 
 /**
  * Convert a human-readable name to a URL/ID-safe slug.
- * e.g. "UFC Replays" -> "ufc-replays"
  */
 function slugify(name) {
   return name
@@ -21,55 +17,38 @@ function slugify(name) {
 }
 
 /**
- * Load and validate the two config files.
- * Throws a descriptive error if anything is missing or malformed.
+ * Load and validate the configuration from the storage layer.
  */
-function loadConfig() {
-  // ── ui-config.json ────────────────────────────────────────────────────────
-  const uiConfigPath = path.join(ROOT, 'ui-config.json');
-  if (!fs.existsSync(uiConfigPath)) {
-    throw new Error(`Missing file: ${uiConfigPath}\nCreate a ui-config.json file with your addon metadata and row definitions.`);
-  }
-
-  let uiConfig;
-  try {
-    uiConfig = JSON.parse(fs.readFileSync(uiConfigPath, 'utf8'));
-  } catch (e) {
-    throw new Error(`Failed to parse ui-config.json: ${e.message}`);
-  }
+async function loadConfig() {
+  const uiConfig = await storage.loadConfig();
 
   if (!uiConfig.addon || !uiConfig.addon.id || !uiConfig.addon.name) {
-    throw new Error('ui-config.json must have an "addon" object with at least "id" and "name" fields.');
+    throw new Error('Configuration must have an "addon" object with at least "id" and "name" fields.');
   }
 
   if (!Array.isArray(uiConfig.rows)) {
-    throw new Error('ui-config.json must have a "rows" array.');
+    throw new Error('Configuration must have a "rows" array.');
   }
 
   uiConfig.rows.forEach((row, i) => {
     if (!row.id) row.id = slugify(row.name);
-    if (!row.name) throw new Error(`ui-config.json rows[${i}] is missing required field "name"`);
+    if (!row.name) throw new Error(`Row [${i}] is missing required field "name"`);
     if (!Array.isArray(row.items)) {
-      throw new Error(`ui-config.json rows[${i}] ("${row.name}") must have an "items" array`);
+      throw new Error(`Row [${i}] ("${row.name}") must have an "items" array`);
     }
   });
 
-  const rows = uiConfig.rows;
-
-
-  // Detect duplicate slugs (two rows with the same effective ID)
+  // Detect duplicate slugs
   const seenIds = new Set();
-  rows.forEach(row => {
+  uiConfig.rows.forEach(row => {
     if (seenIds.has(row.id)) {
-      throw new Error(
-        `Two rows produce the same slug ID "${row.id}". Please give them distinct names.`
-      );
+      throw new Error(`Two rows produce the same slug ID "${row.id}". Please give them distinct names.`);
     }
     seenIds.add(row.id);
   });
 
   return {
-    rows,
+    rows: uiConfig.rows,
     addonMeta: uiConfig.addon,
   };
 }

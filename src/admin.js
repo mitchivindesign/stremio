@@ -24,9 +24,9 @@ const https = require('https');
 const http = require('http');
 
 const ROOT = path.join(__dirname, '..');
-const CONFIG_FILE = path.join(ROOT, 'ui-config.json');
 const AUTH_FILE = path.join(ROOT, 'stremio-auth.json');
 const HTML_FILE = path.join(__dirname, 'admin.html');
+const storage = require('./storage');
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -82,18 +82,22 @@ function mountAdmin(app, onReload) {
 
 
     // ── REST: ui-config ───────────────────────────────────────────────────────
-    app.get('/api/config', (_req, res) => {
-        try { res.json(JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'))); }
-        catch (e) { res.status(500).json({ error: e.message }); }
+    app.get('/api/config', async (_req, res) => {
+        try {
+            const config = await storage.loadConfig();
+            res.json(config);
+        } catch (e) { res.status(500).json({ error: e.message }); }
     });
 
-    app.put('/api/config', (req, res) => {
+    app.put('/api/config', async (req, res) => {
         try {
             const cfg = req.body;
             if (!cfg || !cfg.addon || !Array.isArray(cfg.rows))
                 return res.status(400).json({ error: 'Invalid config shape' });
-            fs.writeFileSync(CONFIG_FILE, JSON.stringify(cfg, null, 2), 'utf8');
-            if (onReload) onReload();
+
+            await storage.saveConfig(cfg);
+
+            if (onReload) await onReload();
             res.json({ ok: true, rows: cfg.rows.length });
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
