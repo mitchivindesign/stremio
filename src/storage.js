@@ -12,8 +12,8 @@ const ROOT = path.join(__dirname, '..');
 const LOCAL_AUTH = path.join(ROOT, 'stremio-auth.json');
 
 // ENV VARS for Cloud Persistence
-const GIST_ID = process.env.GIST_ID;
-const GH_TOKEN = process.env.GH_TOKEN; // Personal Access Token (classic) with 'gist' scope
+const GIST_ID = (process.env.GIST_ID || '').trim();
+const GH_TOKEN = (process.env.GH_TOKEN || '').trim(); // Personal Access Token (classic) with 'gist' scope
 
 /**
  * Common shape for our config
@@ -28,7 +28,8 @@ function normalizeConfig(data) {
  * Common shape for our auth
  */
 function normalizeAuth(data) {
-    return data || null;
+    if (!data) return null;
+    return (data.authKey && data.email) ? data : null;
 }
 
 /**
@@ -36,14 +37,15 @@ function normalizeAuth(data) {
  */
 async function loadConfig() {
     if (GIST_ID && GH_TOKEN) {
-        console.log(`☁️ Loading config from Gist: ${GIST_ID}`);
+        console.log(`☁️  Loading config from Gist ID: ${GIST_ID.substring(0, 4)}...`);
         try {
             const gist = await fetchGist();
-            if (gist.files['ui-config.json']) {
+            if (gist.files && gist.files['ui-config.json']) {
                 return normalizeConfig(JSON.parse(gist.files['ui-config.json'].content));
             }
+            console.log('⚠️  ui-config.json not found in Gist, returning default.');
         } catch (e) {
-            console.error(`Gist load error: ${e.message}`);
+            console.error(`❌ Gist load error: ${e.message}`);
         }
         return normalizeConfig({});
     }
@@ -63,7 +65,7 @@ async function saveConfig(config) {
     const json = JSON.stringify(data, null, 2);
 
     if (GIST_ID && GH_TOKEN) {
-        console.log(`☁️ Saving config to Gist: ${GIST_ID}`);
+        console.log(`☁️  Saving config to Gist ID: ${GIST_ID.substring(0, 4)}...`);
         return updateGist({ 'ui-config.json': { content: json } });
     }
 
@@ -79,16 +81,16 @@ async function loadAuth() {
     if (GIST_ID && GH_TOKEN) {
         try {
             const gist = await fetchGist();
-            if (gist.files['stremio-auth.json']) {
+            if (gist.files && gist.files['stremio-auth.json']) {
                 return normalizeAuth(JSON.parse(gist.files['stremio-auth.json'].content));
             }
         } catch (e) {
-            console.error(`Gist auth load error: ${e.message}`);
+            console.error(`❌ Gist auth load error: ${e.message}`);
         }
         return null;
     }
 
-    try { return JSON.parse(fs.readFileSync(LOCAL_AUTH, 'utf8')); }
+    try { return normalizeAuth(JSON.parse(fs.readFileSync(LOCAL_AUTH, 'utf8'))); }
     catch (_) { return null; }
 }
 
@@ -99,6 +101,7 @@ async function saveAuth(data) {
     const json = JSON.stringify(data, null, 2);
 
     if (GIST_ID && GH_TOKEN) {
+        console.log(`☁️  Saving auth to Gist ID: ${GIST_ID.substring(0, 4)}...`);
         return updateGist({ 'stremio-auth.json': { content: json } });
     }
 
@@ -110,7 +113,7 @@ async function saveAuth(data) {
  */
 async function clearAuth() {
     if (GIST_ID && GH_TOKEN) {
-        // To "delete" a file in Gist PATCH, set it to null
+        console.log(`☁️  Clearing auth from Gist ID: ${GIST_ID.substring(0, 4)}...`);
         return updateGist({ 'stremio-auth.json': null });
     }
 
@@ -134,8 +137,13 @@ function fetchGist() {
             let body = '';
             res.on('data', d => body += d);
             res.on('end', () => {
+                const status = res.statusCode;
+                if (status === 401) return reject(new Error(`Unauthorized: Check if your GH_TOKEN is valid and has 'gist' scope.`));
+                if (status === 404) return reject(new Error(`Gist Not Found: Check if GIST_ID (${GIST_ID.substring(0, 4)}...) is correct.`));
+                if (status >= 400) return reject(new Error(`GitHub API Error: ${status}`));
+
                 try { resolve(JSON.parse(body)); }
-                catch (e) { reject(e); }
+                catch (e) { reject(new Error(`Failed to parse GitHub response: ${e.message}`)); }
             });
         });
         req.on('error', reject);
@@ -158,8 +166,11 @@ function updateGist(files) {
             }
         };
         const req = https.request(options, (res) => {
-            if (res.statusCode === 200) resolve({ ok: true });
-            else reject(new Error(`Gist update failed: ${res.statusCode}`));
+            const status = res.statusCode;
+            if (status === 200) resolve({ ok: true });
+            else if (status === 401) reject(new Error(`Unauthorized: Check if your GH_TOKEN is valid and has 'gist' scope.`));
+            else if (status === 404) reject(new Error(`Gist Not Found: Check if GIST_ID (${GIST_ID.substring(0, 4)}...) is correct.`));
+            else reject(new Error(`GitHub PATCH failed: ${status}`));
         });
         req.on('error', reject);
         req.write(payload);

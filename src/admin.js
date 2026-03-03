@@ -105,8 +105,14 @@ function mountAdmin(app, onReload) {
         try {
             const result = await stremioPost('/api/login', { type: 'Auth', email, password });
             if (!result.result?.authKey)
-                return res.status(401).json({ error: result.error?.message || 'Login failed' });
-            await AUTH.saveAuth({ authKey: result.result.authKey, email });
+                return res.status(401).json({ error: result.error?.message || 'Stremio login failed' });
+
+            try {
+                await AUTH.saveAuth({ authKey: result.result.authKey, email });
+            } catch (gistErr) {
+                return res.status(500).json({ error: `Cloud Save Failed: ${gistErr.message}` });
+            }
+
             res.json({ ok: true, email });
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
