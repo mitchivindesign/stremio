@@ -52,6 +52,11 @@ app.use((req, res, next) => {
     next();
 });
 
+// Redirect root to admin for easier navigation
+app.get('/', (_req, res) => {
+    res.redirect('/admin');
+});
+
 // Serve manifest dynamically
 app.get('/manifest.json', (_req, res) => {
     if (!currentConfig) return res.status(503).json({ error: 'Starting up...' });
