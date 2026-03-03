@@ -25,8 +25,8 @@ const http = require('http');
 
 const ROOT = path.join(__dirname, '..');
 const AUTH_FILE = path.join(ROOT, 'stremio-auth.json');
-const HTML_FILE = path.join(__dirname, 'admin.html');
 const storage = require('./storage');
+const HTML_FILE = storage.HTML_FILE;
 
 // Helper to clean up code
 const AUTH = storage;

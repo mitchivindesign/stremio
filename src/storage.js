@@ -10,6 +10,7 @@ const https = require('https');
 
 const ROOT = path.join(__dirname, '..');
 const LOCAL_AUTH = path.join(ROOT, 'stremio-auth.json');
+const HTML_FILE = path.join(ROOT, 'src', 'admin.html');
 
 // ENV VARS for Cloud Persistence
 const GIST_ID = (process.env.GIST_ID || '').trim();
@@ -130,7 +131,7 @@ function fetchGist() {
             method: 'GET',
             headers: {
                 'User-Agent': 'stremio-row-factory',
-                'Authorization': `token ${GH_TOKEN}`
+                'Authorization': `Bearer ${GH_TOKEN}`
             }
         };
         const req = https.request(options, (res) => {
@@ -138,9 +139,12 @@ function fetchGist() {
             res.on('data', d => body += d);
             res.on('end', () => {
                 const status = res.statusCode;
-                if (status === 401) return reject(new Error(`Unauthorized: Check if your GH_TOKEN is valid and has 'gist' scope.`));
-                if (status === 404) return reject(new Error(`Gist Not Found: Check if GIST_ID (${GIST_ID.substring(0, 4)}...) is correct.`));
-                if (status >= 400) return reject(new Error(`GitHub API Error: ${status}`));
+                if (status >= 400) {
+                    console.error(`GitHub API Error (${status}):`, body);
+                    if (status === 401) return reject(new Error(`Unauthorized: Check if your GH_TOKEN is valid and has 'gist' scope.`));
+                    if (status === 404) return reject(new Error(`Gist Not Found: Check if GIST_ID (${GIST_ID.substring(0, 4)}...) is correct.`));
+                    return reject(new Error(`GitHub API Error: ${status}`));
+                }
 
                 try { resolve(JSON.parse(body)); }
                 catch (e) { reject(new Error(`Failed to parse GitHub response: ${e.message}`)); }
@@ -160,17 +164,25 @@ function updateGist(files) {
             method: 'PATCH',
             headers: {
                 'User-Agent': 'stremio-row-factory',
-                'Authorization': `token ${GH_TOKEN}`,
+                'Authorization': `Bearer ${GH_TOKEN}`,
                 'Content-Type': 'application/json',
                 'Content-Length': Buffer.byteLength(payload)
             }
         };
         const req = https.request(options, (res) => {
-            const status = res.statusCode;
-            if (status === 200) resolve({ ok: true });
-            else if (status === 401) reject(new Error(`Unauthorized: Check if your GH_TOKEN is valid and has 'gist' scope.`));
-            else if (status === 404) reject(new Error(`Gist Not Found: Check if GIST_ID (${GIST_ID.substring(0, 4)}...) is correct.`));
-            else reject(new Error(`GitHub PATCH failed: ${status}`));
+            let body = '';
+            res.on('data', d => body += d);
+            res.on('end', () => {
+                const status = res.statusCode;
+                if (status === 200) {
+                    resolve({ ok: true });
+                } else {
+                    console.error(`GitHub PATCH Error (${status}):`, body);
+                    if (status === 401) reject(new Error(`Unauthorized: Check if your GH_TOKEN is valid and has 'gist' scope.`));
+                    else if (status === 404) reject(new Error(`Gist Not Found: Check if GIST_ID (${GIST_ID.substring(0, 4)}...) is correct.`));
+                    else reject(new Error(`GitHub PATCH failed: ${status}`));
+                }
+            });
         });
         req.on('error', reject);
         req.write(payload);
@@ -178,4 +190,4 @@ function updateGist(files) {
     });
 }
 
-module.exports = { loadConfig, saveConfig, loadAuth, saveAuth, clearAuth };
+module.exports = { loadConfig, saveConfig, loadAuth, saveAuth, clearAuth, HTML_FILE };
