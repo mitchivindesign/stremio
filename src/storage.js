@@ -9,7 +9,7 @@ const path = require('path');
 const https = require('https');
 
 const ROOT = path.join(__dirname, '..');
-const LOCAL_CONFIG = path.join(ROOT, 'ui-config.json');
+const LOCAL_AUTH = path.join(ROOT, 'stremio-auth.json');
 
 // ENV VARS for Cloud Persistence
 const GIST_ID = process.env.GIST_ID;
@@ -19,9 +19,16 @@ const GH_TOKEN = process.env.GH_TOKEN; // Personal Access Token (classic) with '
  * Common shape for our config
  */
 function normalizeConfig(data) {
-    if (!data.addon) data.addon = { id: 'custom-rows', name: 'My Rows', version: '1.0.0' };
+    if (!data || !data.addon) data = { addon: { id: 'custom-rows', name: 'My Rows', version: '1.0.0' }, rows: [] };
     if (!Array.isArray(data.rows)) data.rows = [];
     return data;
+}
+
+/**
+ * Common shape for our auth
+ */
+function normalizeAuth(data) {
+    return data || null;
 }
 
 /**
@@ -30,32 +37,15 @@ function normalizeConfig(data) {
 async function loadConfig() {
     if (GIST_ID && GH_TOKEN) {
         console.log(`☁️ Loading config from Gist: ${GIST_ID}`);
-        return new Promise((resolve, reject) => {
-            const options = {
-                hostname: 'api.github.com',
-                path: `/gists/${GIST_ID}`,
-                method: 'GET',
-                headers: {
-                    'User-Agent': 'stremio-row-factory',
-                    'Authorization': `token ${GH_TOKEN}`
-                }
-            };
-            const req = https.request(options, (res) => {
-                let body = '';
-                res.on('data', d => body += d);
-                res.on('end', () => {
-                    try {
-                        const gist = JSON.parse(body);
-                        const content = gist.files['ui-config.json'].content;
-                        resolve(normalizeConfig(JSON.parse(content)));
-                    } catch (e) {
-                        reject(new Error(`Failed to parse Gist content: ${e.message}`));
-                    }
-                });
-            });
-            req.on('error', reject);
-            req.end();
-        });
+        try {
+            const gist = await fetchGist();
+            if (gist.files['ui-config.json']) {
+                return normalizeConfig(JSON.parse(gist.files['ui-config.json'].content));
+            }
+        } catch (e) {
+            console.error(`Gist load error: ${e.message}`);
+        }
+        return normalizeConfig({});
     }
 
     // Fallback to local
@@ -74,31 +64,7 @@ async function saveConfig(config) {
 
     if (GIST_ID && GH_TOKEN) {
         console.log(`☁️ Saving config to Gist: ${GIST_ID}`);
-        return new Promise((resolve, reject) => {
-            const payload = JSON.stringify({
-                files: {
-                    'ui-config.json': { content: json }
-                }
-            });
-            const options = {
-                hostname: 'api.github.com',
-                path: `/gists/${GIST_ID}`,
-                method: 'PATCH',
-                headers: {
-                    'User-Agent': 'stremio-row-factory',
-                    'Authorization': `token ${GH_TOKEN}`,
-                    'Content-Type': 'application/json',
-                    'Content-Length': Buffer.byteLength(payload)
-                }
-            };
-            const req = https.request(options, (res) => {
-                if (res.statusCode === 200) resolve({ ok: true });
-                else reject(new Error(`Gist save failed: ${res.statusCode}`));
-            });
-            req.on('error', reject);
-            req.write(payload);
-            req.end();
-        });
+        return updateGist({ 'ui-config.json': { content: json } });
     }
 
     // Fallback to local
@@ -106,4 +72,99 @@ async function saveConfig(config) {
     return { ok: true };
 }
 
-module.exports = { loadConfig, saveConfig };
+/**
+ * Load auth from Gist or Local file
+ */
+async function loadAuth() {
+    if (GIST_ID && GH_TOKEN) {
+        try {
+            const gist = await fetchGist();
+            if (gist.files['stremio-auth.json']) {
+                return normalizeAuth(JSON.parse(gist.files['stremio-auth.json'].content));
+            }
+        } catch (e) {
+            console.error(`Gist auth load error: ${e.message}`);
+        }
+        return null;
+    }
+
+    try { return JSON.parse(fs.readFileSync(LOCAL_AUTH, 'utf8')); }
+    catch (_) { return null; }
+}
+
+/**
+ * Save auth to Gist or Local file
+ */
+async function saveAuth(data) {
+    const json = JSON.stringify(data, null, 2);
+
+    if (GIST_ID && GH_TOKEN) {
+        return updateGist({ 'stremio-auth.json': { content: json } });
+    }
+
+    fs.writeFileSync(LOCAL_AUTH, json, 'utf8');
+}
+
+/**
+ * Clear auth from Gist or Local file
+ */
+async function clearAuth() {
+    if (GIST_ID && GH_TOKEN) {
+        // To "delete" a file in Gist PATCH, set it to null
+        return updateGist({ 'stremio-auth.json': null });
+    }
+
+    if (fs.existsSync(LOCAL_AUTH)) fs.unlinkSync(LOCAL_AUTH);
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function fetchGist() {
+    return new Promise((resolve, reject) => {
+        const options = {
+            hostname: 'api.github.com',
+            path: `/gists/${GIST_ID}`,
+            method: 'GET',
+            headers: {
+                'User-Agent': 'stremio-row-factory',
+                'Authorization': `token ${GH_TOKEN}`
+            }
+        };
+        const req = https.request(options, (res) => {
+            let body = '';
+            res.on('data', d => body += d);
+            res.on('end', () => {
+                try { resolve(JSON.parse(body)); }
+                catch (e) { reject(e); }
+            });
+        });
+        req.on('error', reject);
+        req.end();
+    });
+}
+
+function updateGist(files) {
+    return new Promise((resolve, reject) => {
+        const payload = JSON.stringify({ files });
+        const options = {
+            hostname: 'api.github.com',
+            path: `/gists/${GIST_ID}`,
+            method: 'PATCH',
+            headers: {
+                'User-Agent': 'stremio-row-factory',
+                'Authorization': `token ${GH_TOKEN}`,
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(payload)
+            }
+        };
+        const req = https.request(options, (res) => {
+            if (res.statusCode === 200) resolve({ ok: true });
+            else reject(new Error(`Gist update failed: ${res.statusCode}`));
+        });
+        req.on('error', reject);
+        req.write(payload);
+        req.end();
+    });
+}
+
+module.exports = { loadConfig, saveConfig, loadAuth, saveAuth, clearAuth };

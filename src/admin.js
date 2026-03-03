@@ -28,20 +28,8 @@ const AUTH_FILE = path.join(ROOT, 'stremio-auth.json');
 const HTML_FILE = path.join(__dirname, 'admin.html');
 const storage = require('./storage');
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-function loadAuth() {
-    try { return JSON.parse(fs.readFileSync(AUTH_FILE, 'utf8')); }
-    catch (_) { return null; }
-}
-
-function saveAuth(data) {
-    fs.writeFileSync(AUTH_FILE, JSON.stringify(data, null, 2), 'utf8');
-}
-
-function clearAuth() {
-    if (fs.existsSync(AUTH_FILE)) fs.unlinkSync(AUTH_FILE);
-}
+// Helper to clean up code
+const AUTH = storage;
 
 /** Make a POST request to the Stremio API and resolve with parsed JSON. */
 function stremioPost(path, body) {
@@ -104,8 +92,8 @@ function mountAdmin(app, onReload) {
 
 
     // ── REST: Stremio auth status ─────────────────────────────────────────────
-    app.get('/api/stremio/status', (_req, res) => {
-        const auth = loadAuth();
+    app.get('/api/stremio/status', async (_req, res) => {
+        const auth = await AUTH.loadAuth();
         res.json({ loggedIn: !!auth, email: auth?.email || null });
     });
 
@@ -118,20 +106,20 @@ function mountAdmin(app, onReload) {
             const result = await stremioPost('/api/login', { type: 'Auth', email, password });
             if (!result.result?.authKey)
                 return res.status(401).json({ error: result.error?.message || 'Login failed' });
-            saveAuth({ authKey: result.result.authKey, email });
+            await AUTH.saveAuth({ authKey: result.result.authKey, email });
             res.json({ ok: true, email });
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
 
     // ── REST: Stremio logout ──────────────────────────────────────────────────
-    app.post('/api/stremio/logout', (_req, res) => {
-        clearAuth();
+    app.post('/api/stremio/logout', async (_req, res) => {
+        await AUTH.clearAuth();
         res.json({ ok: true });
     });
 
     // ── REST: Stremio library ─────────────────────────────────────────────────
     app.get('/api/stremio/library', async (req, res) => {
-        const auth = loadAuth();
+        const auth = await AUTH.loadAuth();
         if (!auth) return res.status(401).json({ error: 'Not logged in' });
 
         const skip = parseInt(req.query.skip || '0', 10);
@@ -173,7 +161,7 @@ function mountAdmin(app, onReload) {
 
     // ── REST: Stremio addon collection ───────────────────────────────────────
     app.get('/api/stremio/addons', async (req, res) => {
-        const auth = loadAuth();
+        const auth = await AUTH.loadAuth();
         if (!auth) return res.status(401).json({ error: 'Not logged in' });
         try {
             const result = await stremioPost('/api/addonCollectionGet', { authKey: auth.authKey });
