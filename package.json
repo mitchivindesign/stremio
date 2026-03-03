@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node index.js",
-    "build": "node scripts/cross-build.js"
+    "build": "node -e \"if(!process.env.VERCEL) try { require('./scripts/build.js') } catch(e) { console.log('Run locally to build.') }\"",
+    "vercel-build": "echo skipping-build"
   },
   "dependencies": {
     "express": "^5.2.1",
