@@ -1,100 +1,67 @@
-# Stremio Custom Row Factory
+# Stremio Row Factory (Cloud Edition)
 
-A local Stremio addon that turns two simple JSON files into **N custom home-screen rows**, each populated by your own stream links.
+A cloud-native Stremio addon that lets you create and manage **Custom Home-Screen Rows** directly through a web-based Admin Panel. All data is persisted to your private GitHub Gist, making it permanent and accessible from anywhere.
 
 ---
 
-## Quick Start
+## 🚀 Key Features
 
+- **Web Admin Panel**: Manage your categories and items without touching code.
+- **Stremio Integration**: Log in with your Stremio account to browse your library and add items to rows instantly.
+- **Cloud Persistence**: Uses **GitHub Gists** to store your configuration, ensuring it's never lost during server restarts.
+- **Vercel Optimized**: Built specifically for serverless deployment with optimized routing and bundling.
+
+---
+
+## 🛠 Setup & Deployment
+
+### 1. Credentials
+Ensure you have the following Environment Variables set (either in `env.env` for local or in your Vercel Dashboard):
+- `GIST_ID`: The ID of your private GitHub Gist.
+- `GH_TOKEN`: A GitHub Personal Access Token (classic) with the `gist` scope.
+
+### 2. Local Run
 ```bash
 npm install
 node index.js
 ```
+Visit `http://127.00.1:7000/admin` to start building your rows.
 
-Then open Stremio → **Settings → Addons → Install from URL** and paste:
-
-```
-http://127.0.0.1:7000/manifest.json
-```
-
----
-
-## Your Two Config Files
-
-### 1. `streams.json` – Your stream library
-
-Add one object per stream. Required fields: `id`, `title`, `url`, `tags`.
-
-```json
-[
-  {
-    "id": "my-stream-001",
-    "title": "My Stream Title",
-    "description": "Optional description",
-    "thumbnail": "https://example.com/thumb.jpg",
-    "url": "https://example.com/video.m3u8",
-    "tags": ["sports", "ufc"]
-  }
-]
-```
-
-| Field         | Required | Description                                          |
-|---------------|----------|------------------------------------------------------|
-| `id`          | ✅        | Unique identifier (no spaces)                        |
-| `title`       | ✅        | Display name in Stremio                              |
-| `url`         | ✅        | Direct stream URL (mp4, m3u8, etc.)                  |
-| `tags`        | ✅        | Array of strings used to assign this stream to rows  |
-| `description` | ❌        | Optional subtitle shown in Stremio                   |
-| `thumbnail`   | ❌        | Optional poster/thumbnail image URL                  |
+### 3. Vercel Deployment
+Deploying to Vercel allows your addon to run 24/7 for free.
+- **Root Directory**: Ensure it is set to `./`.
+- **Build Command**: Set to `npm run vercel-build` (which is a fast skip-op).
 
 ---
 
-### 2. `ui-config.json` – Your row definitions
+## 📖 How to Use
 
-```json
-{
-  "addon": {
-    "id": "com.myrows.custom",
-    "version": "1.0.0",
-    "name": "My Custom Rows",
-    "description": "My personal curated rows."
-  },
-  "rows": [
-    { "name": "UFC Replays",  "tags": ["ufc"] },
-    { "name": "Local News",   "tags": ["news", "local-news"] },
-    { "name": "Movie Night",  "tags": ["movie-night"] }
-  ]
-}
-```
+### Managing Rows
+1. Navigate to the **🎬 Rows** tab in the Admin Panel.
+2. Create a row (e.g., "UFC Favorites" or "Daily News").
+3. Choose the **Content Type** (Movies, Series, or TV).
 
-**Tag matching**: A stream appears in a row if it has **any** of the row's tags.
+### Adding Items
+1. Navigate to the **🎞 Stremio Library** tab.
+2. Click **Connect Account** and log in with your Stremio email/password.
+3. Browse your library or external addons and click **+ Add** to assign items to your rows.
+
+### Saving
+Click the **💾 Save** button at the top right to push your changes to the cloud. Stremio will pick up the changes automatically (may require a restart or a few minutes to clear cache).
 
 ---
 
-## Adding More Rows
+## 🔗 Endpoints
 
-1. Add a new object to `rows` in `ui-config.json`
-2. Make sure your streams in `streams.json` have matching tags
-3. Restart the server (`node index.js`)
-
----
-
-## Configuration
-
-| Variable | Default | Description        |
-|----------|---------|--------------------|
-| `PORT`   | `7000`  | HTTP server port   |
-
-```bash
-PORT=8080 node index.js
-```
+| URL | Description |
+|-----|-------------|
+| `/admin` | Web-based Management Panel |
+| `/manifest.json` | Stremio Addon Manifest (Install URL) |
 
 ---
 
-## Endpoints
-
-| URL                                        | Description                        |
-|--------------------------------------------|------------------------------------|
-| `/manifest.json`                           | Stremio addon manifest             |
-| `/catalog/channel/<row-id>.json`           | Items for a specific row           |
-| `/stream/channel/<stream-id>.json`         | Stream URL for a specific item     |
+## ⚙️ Technical Details
+- **Backend**: Node.js & Express
+- **Frontend**: Vanilla JS SPA with responsive CSS
+- **Persistence**: GitHub Gist JSON API
+- **Deployment**: Vercel Serverless Functions

@@ -3,11 +3,10 @@
  * Defines the catalog handler and (channel-only) stream handler.
  *
  * Content type behaviour:
- *  - "channel" items: this addon provides the stream URL directly
- *  - "movie" / "series" items: this addon provides the catalog row; the user's
- *    installed streaming addons (e.g. Torrentio) supply the actual streams via
- *    the item's IMDB ID. We deliberately do NOT register a stream handler for
- *    these types so Stremio falls through naturally.
+ *  - "movie" / "series" / "tv": this addon provides the catalog row; the user's
+ *    installed streaming addons supply the actual streams via the item's ID.
+ *    We deliberately do NOT register a stream handler for any of these
+ *    types so Stremio falls through naturally to other addons.
  */
 
 'use strict';
@@ -24,7 +23,7 @@ function libraryMeta(item) {
         name: item.title,
         description: item.description || '',
         poster: item.thumbnail || '',
-        posterShape: 'square',
+        posterShape: type === 'tv' ? 'square' : 'poster',
         background: item.thumbnail || '',
 
         imdbRating: item.imdbRating || undefined,

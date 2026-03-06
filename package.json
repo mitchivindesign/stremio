@@ -10,6 +10,7 @@
     "vercel-build": "echo skipping-build"
   },
   "dependencies": {
+    "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "stremio-addon-sdk": "^1.6.10"
   },

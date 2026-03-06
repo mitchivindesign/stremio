@@ -4,14 +4,11 @@
  *
  * File CRUD routes:
  *   GET  /admin          → serve the admin SPA
- *   GET  /api/streams    → read streams.json
- *   PUT  /api/streams    → write streams.json
  *   GET  /api/config     → read ui-config.json
  *   PUT  /api/config     → write ui-config.json
  *
  * Stremio account proxy routes:
  *   POST /api/stremio/login    → authenticate with Stremio, store authKey
- *   GET  /api/stremio/library  → fetch library items from Stremio API
  *   POST /api/stremio/logout   → clear stored authKey
  *   GET  /api/stremio/status   → return current auth status (logged in / not)
  */
@@ -67,13 +64,11 @@ function mountAdmin(app, onReload) {
     // ── Serve the SPA ────────────────────────────────────────────────────────
     app.get('/admin', (_req, res) => res.sendFile(HTML_FILE));
 
-
-
     // ── REST: ui-config ───────────────────────────────────────────────────────
     app.get('/api/config', async (_req, res) => {
         try {
             const config = await storage.loadConfig();
-            res.json(config);
+            res.json(storage.normalizeConfig(config));
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
 
@@ -85,7 +80,10 @@ function mountAdmin(app, onReload) {
 
             await storage.saveConfig(cfg);
 
-            if (onReload) await onReload();
+            if (onReload) {
+                // Wait for the reload to complete (rebuilding manifest/router)
+                await onReload();
+            }
             res.json({ ok: true, rows: cfg.rows.length });
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
@@ -123,53 +121,13 @@ function mountAdmin(app, onReload) {
         res.json({ ok: true });
     });
 
-    // ── REST: Stremio library ─────────────────────────────────────────────────
-    app.get('/api/stremio/library', async (req, res) => {
-        const auth = await AUTH.loadAuth();
-        if (!auth) return res.status(401).json({ error: 'Not logged in' });
-
-        const skip = parseInt(req.query.skip || '0', 10);
-        const limit = parseInt(req.query.limit || '100', 10);
-        const type = req.query.type || null; // "movie", "series", or null for all
-
-        try {
-            const body = {
-                authKey: auth.authKey,
-                collection: 'library',
-                sortField: 'mtime',
-                sortDirection: -1,
-                skip,
-                limit,
-            };
-            if (type) body.type = type;
-
-            const result = await stremioPost('/api/libraryList', body);
-            console.log('Stremio Library API Response:', JSON.stringify(result).substring(0, 300) + '...');
-            if (result.error) return res.status(400).json({ error: result.error.message });
-
-
-            // Normalise to a friendly shape for the admin UI
-            const items = (result.result?.items || [])
-                .filter(i => !i.removed && i.id)
-                .map(i => ({
-                    id: i.id,                              // IMDB ID, e.g. "tt1234567"
-                    type: i.type,                            // "movie" or "series"
-                    title: i.name,
-                    thumbnail: i.poster || '',
-                    description: i.description || '',
-                    year: i.year || null,
-                    imdbRating: i.imdbRating || null,
-                }));
-
-            res.json({ items, total: result.result?.count || items.length });
-        } catch (e) { res.status(500).json({ error: e.message }); }
-    });
-
     // ── REST: Stremio addon collection ───────────────────────────────────────
     app.get('/api/stremio/addons', async (req, res) => {
         const auth = await AUTH.loadAuth();
         if (!auth) return res.status(401).json({ error: 'Not logged in' });
         try {
+            // ALWAYS re-fetch from Stremio to ensure we have the latest catalogs/links
+            console.log(`🔄  Refreshing Stremio Addon Collection for ${auth.email}...`);
             const result = await stremioPost('/api/addonCollectionGet', { authKey: auth.authKey });
             if (result.error) return res.status(400).json({ error: result.error.message });
 
@@ -190,20 +148,20 @@ function mountAdmin(app, onReload) {
         if (!urlStr) return res.status(400).json({ error: 'url parameter required' });
 
         try {
-            const protocol = urlStr.startsWith('https') ? https : http;
-            const response = await new Promise((resolve, reject) => {
-                protocol.get(urlStr, { headers: { 'User-Agent': 'stremio-row-factory/1.0' } }, (res) => {
-                    let data = '';
-                    res.on('data', chunk => data += chunk);
-                    res.on('end', () => {
-                        try { resolve(JSON.parse(data)); }
-                        catch (e) { reject(new Error('Invalid JSON from addon')); }
-                    });
-                }).on('error', (err) => {
-                    reject(new Error(`Fetch error (${err.message}) for URL: ${urlStr}`));
-                });
+            // Node 18+ native fetch handles gzip automatically
+            const response = await fetch(urlStr, {
+                headers: { 'User-Agent': 'stremio-row-factory/1.0' }
             });
-            res.json(response);
+
+            // Handle 404 as empty list (standard for Stremio pagination end)
+            if (response.status === 404) {
+                return res.json({ metas: [] });
+            }
+
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            res.json(data);
         } catch (e) {
             console.error('Proxy Error:', e.message);
             res.status(500).json({ error: e.message });

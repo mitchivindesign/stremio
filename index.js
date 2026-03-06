@@ -1,14 +1,18 @@
 /**
- * index.js – Stremio Custom Row Factory
+ * index.js – Stremio Row Factory
  *
  * Startup sequence:
- *  1. Load & validate streams.json + ui-config.json
- *  2. Build the Stremio manifest (one catalog per row)
- *  3. Register catalog + stream handlers
- *  4. Mount Stremio routes + admin panel on an Express server
+ *  1. Load env vars (local: from env.env via dotenv | Vercel: from dashboard)
+ *  2. Load & validate config from GitHub Gist (or local fallback)
+ *  3. Build the Stremio manifest (one catalog per row)
+ *  4. Register catalog handlers
+ *  5. Mount Express routes + admin panel
  */
 
 'use strict';
+
+// Load env.env locally (no-op on Vercel where env vars are set in the dashboard)
+require('dotenv').config({ path: require('path').join(__dirname, 'env.env') });
 
 const express = require('express');
 const { addonBuilder } = require('stremio-addon-sdk');
@@ -20,18 +24,12 @@ const { mountAdmin } = require('./src/admin');
 
 // ── 1. App State & Manifest ────────────────────────────────────────────────
 let currentConfig;
+let activeSdkRouter = null;
 
 async function startup() {
     try {
         currentConfig = await loadConfig();
-        const manifest = buildManifest(currentConfig.addonMeta, currentConfig.rows);
-        const builder = new addonBuilder(manifest);
-        registerHandlers(builder, () => currentConfig);
-
-        const addonInterface = builder.getInterface();
-        const sdkRouter = getRouter(addonInterface);
-        app.use(sdkRouter);
-
+        rebuildSdkRouter();
         console.log(`✅  Startup complete: ${currentConfig.rows.length} rows loaded.`);
     } catch (err) {
         console.error('\n❌  Startup error:\n');
@@ -39,6 +37,20 @@ async function startup() {
         // Don't exit if in serverless environment
         if (require.main === module) process.exit(1);
     }
+}
+
+function rebuildSdkRouter() {
+    // 1. Build a fresh manifest and builder with the latest rows
+    const manifest = buildManifest(currentConfig.addonMeta, currentConfig.rows);
+    const builder = new addonBuilder(manifest);
+    registerHandlers(builder, () => currentConfig);
+
+    // 2. Generate a fresh Express router for the Stremio SDK
+    const addonInterface = builder.getInterface();
+    const newRouter = getRouter(addonInterface);
+
+    // 3. Swap the active router gracefully
+    activeSdkRouter = newRouter;
 }
 
 // ── 2. Build Express app ───────────────────────────────────────────────────
@@ -50,6 +62,17 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', '*');
     next();
+});
+
+// Dynamic SDK Router middleware
+// This intercepts requests and routes them through whatever the *currently active*
+// Stremio SDK router is. If we reload the config, this automatically uses the new one.
+app.use((req, res, next) => {
+    if (activeSdkRouter) {
+        activeSdkRouter(req, res, next);
+    } else {
+        next();
+    }
 });
 
 // Redirect root to admin for easier navigation
@@ -70,7 +93,8 @@ mountAdmin(app, async () => {
     console.log('♻️  Reloading configuration...');
     try {
         currentConfig = await loadConfig();
-        console.log(`✅  Reloaded: ${currentConfig.rows.length} rows.`);
+        rebuildSdkRouter(); // Rebuild Stremio SDK router with new rows
+        console.log(`✅  Reloaded: ${currentConfig.rows.length} rows and rebuilt SDK Router.`);
     } catch (e) {
         console.error('❌  Reload failed:', e.message);
     }

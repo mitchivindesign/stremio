@@ -21,7 +21,20 @@ const GH_TOKEN = (process.env.GH_TOKEN || '').trim(); // Personal Access Token (
  * Common shape for our config
  */
 function normalizeConfig(data) {
-    if (!data || !data.addon) data = { addon: { id: 'custom-rows', name: 'My Rows', version: '1.0.0' }, rows: [] };
+    if (!data || !data.addon) {
+        data = {
+            addon: {
+                id: 'com.stremirow.custom',
+                name: 'StremiRow',
+                version: '1.0.0',
+                description: 'Personal curated rows...'
+            },
+            rows: []
+        };
+    }
+    // Always enforce identity
+    data.addon.id = 'com.stremirow.custom';
+    data.addon.name = 'StremiRow';
     if (!Array.isArray(data.rows)) data.rows = [];
     return data;
 }
@@ -191,4 +204,4 @@ function updateGist(files) {
     });
 }
 
-module.exports = { loadConfig, saveConfig, loadAuth, saveAuth, clearAuth, HTML_FILE };
+module.exports = { loadConfig, saveConfig, loadAuth, saveAuth, clearAuth, normalizeConfig, HTML_FILE };
